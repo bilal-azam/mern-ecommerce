@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import ProductList from './pages/ProductList';
 import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
+import OrderHistory from './pages/OrderHistory';
 import { Container } from 'react-bootstrap';
 
 const App = () => {
@@ -17,6 +18,7 @@ const App = () => {
           <Route path="/products" element={<ProductList />} />
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/orders" element={<OrderHistory />} />
         </Routes>
       </Container>
     </Router>
