@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Button } from 'react-bootstrap';
 import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { Elements, CardElement } from '@stripe/react-stripe-js';
 import axios from 'axios';
+import { isAuthenticated } from '../utils/auth';
 
 const stripePromise = loadStripe('your_stripe_public_key');
 
@@ -13,6 +14,11 @@ const CheckoutForm = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
 
+  if (!isAuthenticated()) {
+    navigate('/login');
+    return null;
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!stripe || !elements) return;
@@ -20,8 +26,11 @@ const CheckoutForm = () => {
     setIsProcessing(true);
 
     try {
-      // Create PaymentIntent
-      const { data: { clientSecret } } = await axios.post('http://localhost:5000/api/orders/checkout');
+      const { data: { clientSecret } } = await axios.post('http://localhost:5000/api/orders/checkout', {}, {
+        headers: {
+          'x-auth-token': localStorage.getItem('authToken')
+        }
+      });
 
       const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
@@ -32,7 +41,6 @@ const CheckoutForm = () => {
       if (error) {
         console.error('Payment failed:', error);
       } else if (paymentIntent.status === 'succeeded') {
-        // Handle successful payment here
         navigate('/orders');
       }
     } catch (err) {
