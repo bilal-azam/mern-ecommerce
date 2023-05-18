@@ -50,12 +50,33 @@ const CheckoutForm = () => {
     }
   };
 
+  // Load PayPal script
+  const script = document.createElement('script');
+  script.src = "https://www.paypal.com/sdk/js?client-id=your_paypal_client_id";
+  script.addEventListener('load', () => {
+    window.paypal.Buttons({
+      createOrder: async () => {
+        const { data: { id } } = await axios.post('http://localhost:5000/api/paypal/create-order');
+        return id;
+      },
+      onApprove: async (data) => {
+        await axios.post('http://localhost:5000/api/paypal/capture-order', { orderId: data.orderID });
+        navigate('/orders');
+      },
+      onError: (err) => {
+        console.error('PayPal error:', err);
+      }
+    }).render('#paypal-button-container');
+  });
+  document.body.appendChild(script);
+
   return (
     <form onSubmit={handleSubmit}>
       <CardElement />
       <Button type="submit" disabled={isProcessing}>
         {isProcessing ? 'Processing...' : 'Pay Now'}
       </Button>
+      <div id="paypal-button-container"></div>
     </form>
   );
 };
