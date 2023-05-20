@@ -1,36 +1,54 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
-import { Card, Container } from 'react-bootstrap';
+import ReviewForm from '../components/ReviewForm';
+import { Container, Card, ListGroup } from 'react-bootstrap';
 
-const ProductDetail = () => {
-  const { id } = useParams();
-  const [product, setProduct] = useState(null);
+const ProductDetail = ({ match }) => {
+  const [product, setProduct] = useState({});
+  const [reviews, setReviews] = useState([]);
+  const productId = match.params.id;
 
   useEffect(() => {
     const fetchProduct = async () => {
-      try {
-        const response = await axios.get(`http://localhost:5000/api/products/${id}`);
-        setProduct(response.data);
-      } catch (err) {
-        console.error('Error fetching product:', err);
-      }
+      const { data } = await axios.get(`http://localhost:5000/api/products/${productId}`);
+      setProduct(data);
     };
+
+    const fetchReviews = async () => {
+      const { data } = await axios.get(`http://localhost:5000/api/reviews/${productId}`);
+      setReviews(data);
+    };
+
     fetchProduct();
-  }, [id]);
+    fetchReviews();
+  }, [productId]);
+
+  const handleReviewAdded = () => {
+    axios.get(`http://localhost:5000/api/reviews/${productId}`).then(({ data }) => {
+      setReviews(data);
+    });
+  };
 
   return (
     <Container>
-      {product && (
-        <Card>
-          <Card.Img variant="top" src={product.imageUrl} />
-          <Card.Body>
-            <Card.Title>{product.name}</Card.Title>
-            <Card.Text>{product.description}</Card.Text>
-            <Card.Text>${product.price}</Card.Text>
-          </Card.Body>
-        </Card>
-      )}
+      <Card>
+        <Card.Body>
+          <Card.Title>{product.name}</Card.Title>
+          <Card.Text>{product.description}</Card.Text>
+          <Card.Text>${product.price}</Card.Text>
+        </Card.Body>
+      </Card>
+
+      <ReviewForm productId={productId} onReviewAdded={handleReviewAdded} />
+
+      <ListGroup>
+        {reviews.map(review => (
+          <ListGroup.Item key={review._id}>
+            <strong>{review.userId.name}</strong> - {review.rating} stars
+            <p>{review.comment}</p>
+          </ListGroup.Item>
+        ))}
+      </ListGroup>
     </Container>
   );
 };
