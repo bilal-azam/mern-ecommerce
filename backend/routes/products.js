@@ -5,7 +5,20 @@ const router = express.Router();
 // Get all products
 router.get('/', async (req, res) => {
   try {
-    const products = await Product.find();
+    const { search, minPrice, maxPrice } = req.query;
+    const query = {};
+
+    if (search) {
+      query.name = { $regex: search, $options: 'i' };
+    }
+
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = minPrice;
+      if (maxPrice) query.price.$lte = maxPrice;
+    }
+
+    const products = await Product.find(query);
     res.json(products);
   } catch (err) {
     res.status(500).json({ msg: 'Server error' });
