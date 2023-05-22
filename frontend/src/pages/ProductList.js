@@ -1,40 +1,38 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
-import { ListGroup, Card, Container } from 'react-bootstrap';
+import ProductFilter from '../components/ProductFilter';
+import { Container, Row, Col, Card } from 'react-bootstrap';
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
+  const [filters, setFilters] = useState({});
 
   useEffect(() => {
     const fetchProducts = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/products');
-        setProducts(response.data);
-      } catch (err) {
-        console.error('Error fetching products:', err);
-      }
+      const { data } = await axios.get('http://localhost:5000/api/products', { params: filters });
+      setProducts(data);
     };
+
     fetchProducts();
-  }, []);
+  }, [filters]);
 
   return (
     <Container>
-      <h2>Product List</h2>
-      <ListGroup>
+      <ProductFilter onFilter={setFilters} />
+
+      <Row>
         {products.map(product => (
-          <ListGroup.Item key={product._id}>
+          <Col key={product._id} md={4}>
             <Card>
-              <Card.Img variant="top" src={product.imageUrl} />
               <Card.Body>
                 <Card.Title>{product.name}</Card.Title>
+                <Card.Text>{product.description}</Card.Text>
                 <Card.Text>${product.price}</Card.Text>
-                <Link to={`/products/${product._id}`}>View Details</Link>
               </Card.Body>
             </Card>
-          </ListGroup.Item>
+          </Col>
         ))}
-      </ListGroup>
+      </Row>
     </Container>
   );
 };
