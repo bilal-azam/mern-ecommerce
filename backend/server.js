@@ -8,6 +8,7 @@ const cartRoutes = require('./routes/cart');
 const orderRoutes = require('./routes/orders');
 const paypalRoutes = require('./routes/paypal');
 const reviewRoutes = require('./routes/reviews');
+const userRoutes = require('./routes/users');
 
 const app = express();
 
@@ -31,7 +32,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/paypal', paypalRoutes);
 app.use('/api/reviews', reviewRoutes);
-
+app.use('/api/users', userRoutes);
 
 
 // Basic route
