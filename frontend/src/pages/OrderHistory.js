@@ -1,48 +1,37 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { Container, Table } from 'react-bootstrap';
+import { Container, ListGroup } from 'react-bootstrap';
 
 const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchOrders = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/orders');
-        setOrders(response.data);
-      } catch (err) {
-        console.error('Error fetching orders:', err);
-        navigate('/login');
-      }
+      const { data } = await axios.get('http://localhost:5000/api/users/orders', {
+        headers: { 'x-auth-token': localStorage.getItem('authToken') }
+      });
+      setOrders(data);
     };
+
     fetchOrders();
-  }, [navigate]);
+  }, []);
 
   return (
     <Container>
       <h2>Order History</h2>
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>Order ID</th>
-            <th>Total</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orders.map(order => (
-            <tr key={order._id}>
-              <td>{order._id}</td>
-              <td>${order.total}</td>
-              <td>{order.status}</td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+      <ListGroup>
+        {orders.map(order => (
+          <ListGroup.Item key={order._id}>
+            <h5>Order ID: {order._id}</h5>
+            <ul>
+              {order.items.map(item => (
+                <li key={item._id}>{item.productId.name} - {item.quantity} x ${item.productId.price}</li>
+              ))}
+            </ul>
+            <h6>Total: ${order.totalPrice}</h6>
+          </ListGroup.Item>
+        ))}
+      </ListGroup>
     </Container>
   );
 };
