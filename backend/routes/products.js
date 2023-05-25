@@ -1,5 +1,7 @@
 const express = require('express');
 const Product = require('../models/Product');
+const Review = require('../models/Review');
+
 const router = express.Router();
 
 // Get all products
@@ -30,7 +32,11 @@ router.get('/:id', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ msg: 'Product not found' });
-    res.json(product);
+
+    const reviews = await Review.find({ productId: product._id });
+    const averageRating = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length || 0;
+
+    res.json({ ...product.toObject(), averageRating });
   } catch (err) {
     res.status(500).json({ msg: 'Server error' });
   }
