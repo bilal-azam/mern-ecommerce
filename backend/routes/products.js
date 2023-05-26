@@ -42,4 +42,17 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+router.get('/:id/reviews', async (req, res) => {
+  const { page = 1, limit = 10, sort = 'date' } = req.query;
+  try {
+    const reviews = await Review.find({ productId: req.params.id })
+      .sort({ [sort]: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+    res.json(reviews);
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 module.exports = router;
