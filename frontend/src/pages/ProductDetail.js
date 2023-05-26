@@ -37,6 +37,7 @@ const ProductDetail = ({ match }) => {
           <Card.Text>{product.description}</Card.Text>
           <Card.Text>${product.price}</Card.Text>
         </Card.Body>
+        <Card.Text>Average Rating: {product.averageRating.toFixed(1)} stars</Card.Text>
       </Card>
 
       <ReviewForm productId={productId} onReviewAdded={handleReviewAdded} />
