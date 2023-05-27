@@ -10,6 +10,10 @@ import Profile from './pages/Profile';
 import OrderHistory from './pages/OrderHistory';
 import { Container } from 'react-bootstrap';
 
+const PrivateRoute = ({ element }) => {
+  return isAuthenticated() ? element : <Navigate to="/login" />;
+};
+
 const App = () => {
   return (
     <Router>
@@ -21,8 +25,8 @@ const App = () => {
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/orders" element={<OrderHistory />} />
+          <Route path="/profile" element={<PrivateRoute element={<Profile />} />} />
+          <Route path="/orders" element={<PrivateRoute element={<OrderHistory />} />} />
         </Routes>
       </Container>
     </Router>
