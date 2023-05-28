@@ -1,8 +1,23 @@
 const express = require('express');
+const multer = require('multer');
+const path = require('path');
 const User = require('../models/User');
 const Order = require('../models/Order');
 const auth = require('../middleware/auth');
+
 const router = express.Router();
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage });
+
 
 // Get user profile
 router.get('/profile', auth, async (req, res) => {
@@ -30,6 +45,18 @@ router.get('/orders', auth, async (req, res) => {
   try {
     const orders = await Order.find({ userId: req.user._id }).populate('items.productId');
     res.json(orders);
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// Upload profile image
+router.post('/profile/image', auth, upload.single('image'), async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    user.profileImage = req.file.path;
+    await user.save();
+    res.json({ profileImage: user.profileImage });
   } catch (err) {
     res.status(500).json({ msg: 'Server error' });
   }
