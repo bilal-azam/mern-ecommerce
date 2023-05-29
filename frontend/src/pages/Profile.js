@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, Form, Button } from 'react-bootstrap';
+import { Container, Form, Button, Image } from 'react-bootstrap';
 
 const Profile = () => {
   const [user, setUser] = useState({});
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [profileImage, setProfileImage] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -15,10 +16,28 @@ const Profile = () => {
       setUser(data);
       setName(data.name);
       setEmail(data.email);
+      setProfileImage(data.profileImage);
     };
 
     fetchUser();
   }, []);
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const { data } = await axios.post('http://localhost:5000/api/users/profile/image', formData, {
+        headers: {
+          'x-auth-token': localStorage.getItem('authToken'),
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      setProfileImage(data.profileImage);
+    } catch (err) {
+      console.error('Error uploading image:', err);
+    }
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -34,6 +53,7 @@ const Profile = () => {
   return (
     <Container>
       <h2>User Profile</h2>
+      <Image src={`http://localhost:5000/${profileImage}`} roundedCircle width="100" />
       <Form onSubmit={handleSubmit}>
         <Form.Group controlId="name">
           <Form.Label>Name</Form.Label>
@@ -49,6 +69,13 @@ const Profile = () => {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+          />
+        </Form.Group>
+        <Form.Group controlId="image">
+          <Form.Label>Profile Image</Form.Label>
+          <Form.Control
+            type="file"
+            onChange={handleImageUpload}
           />
         </Form.Group>
         <Button type="submit">Update Profile</Button>
