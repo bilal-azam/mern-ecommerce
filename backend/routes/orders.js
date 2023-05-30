@@ -1,4 +1,5 @@
 const express = require('express');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 const auth = require('../middleware/auth');
@@ -8,24 +9,29 @@ const YOUR_DOMAIN = 'http://localhost:5000';
 const router = express.Router();
 
 // Create order
+// Create order
 router.post('/', auth, async (req, res) => {
+  const { items, totalPrice } = req.body;
   try {
-    const cart = await Cart.findOne({ userId: req.user._id });
-    if (!cart) return res.status(400).json({ msg: 'No items in cart' });
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: totalPrice * 100, // Amount in cents
+      currency: 'usd',
+      description: 'Order payment',
+      payment_method: req.body.paymentMethodId,
+      confirm: true,
+    });
 
-    const total = cart.items.reduce((acc, item) => acc + item.quantity * item.productId.price, 0);
     const order = new Order({
       userId: req.user._id,
-      items: cart.items,
-      total
+      items,
+      totalPrice,
+      paymentIntentId: paymentIntent.id,
     });
 
     await order.save();
-    await Cart.deleteOne({ userId: req.user._id });
-
-    res.json(order);
+    res.status(201).json(order);
   } catch (err) {
-    res.status(500).json({ msg: 'Server error' });
+    res.status(500).json({ msg: 'Payment failed or Order creation failed' });
   }
 });
 
