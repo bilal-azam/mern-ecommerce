@@ -12,6 +12,7 @@ const CheckoutForm = () => {
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
+
   const navigate = useNavigate();
 
   if (!isAuthenticated()) {
@@ -26,7 +27,7 @@ const CheckoutForm = () => {
     setIsProcessing(true);
 
     try {
-      const { data: { clientSecret } } = await axios.post('http://localhost:5000/api/orders/checkout', {}, {
+      const { data: { clientSecret } } = await axios.post('http://localhost:5000/api/orders/checkout', {items, totalPrice}, {
         headers: {
           'x-auth-token': localStorage.getItem('authToken')
         }
