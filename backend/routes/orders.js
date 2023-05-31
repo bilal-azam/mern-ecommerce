@@ -1,5 +1,6 @@
 const express = require('express');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const notificationRoutes = require('./notifications');
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 const auth = require('../middleware/auth');
@@ -8,7 +9,9 @@ const stripe = require('../config/stripe');
 const YOUR_DOMAIN = 'http://localhost:5000';
 const router = express.Router();
 
-// Create order
+// Use notification routes
+app.use('/api/notifications', notificationRoutes);
+
 // Create order
 router.post('/', auth, async (req, res) => {
   const { items, totalPrice } = req.body;
@@ -29,6 +32,13 @@ router.post('/', auth, async (req, res) => {
     });
 
     await order.save();
+
+    // Notify user
+    await axios.post('http://localhost:5000/api/notifications', {
+      userId: req.user._id,
+      message: `Your order #${order._id} has been successfully placed.`,
+    });
+
     res.status(201).json(order);
   } catch (err) {
     res.status(500).json({ msg: 'Payment failed or Order creation failed' });
