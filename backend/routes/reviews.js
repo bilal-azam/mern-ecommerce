@@ -32,4 +32,20 @@ router.get('/:productId', async (req, res) => {
   }
 });
 
+// Moderate review
+router.post('/moderate', auth, async (req, res) => {
+  const { reviewId, approved } = req.body;
+  try {
+    const review = await Review.findById(reviewId);
+    if (!review) return res.status(404).json({ msg: 'Review not found' });
+
+    review.approved = approved;
+    await review.save();
+
+    res.json(review);
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 module.exports = router;
