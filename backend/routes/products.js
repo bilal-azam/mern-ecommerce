@@ -55,4 +55,18 @@ router.get('/:id/reviews', async (req, res) => {
   }
 });
 
+router.get('/search', async (req, res) => {
+  const { query, category, priceRange } = req.query;
+  try {
+    const products = await Product.find({
+      $text: { $search: query },
+      category: category ? category : { $exists: true },
+      price: priceRange ? { $gte: priceRange.split('-')[0], $lte: priceRange.split('-')[1] } : { $exists: true },
+    });
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 module.exports = router;
