@@ -76,4 +76,14 @@ router.post('/checkout', auth, async (req, res) => {
   }
 });
 
+// Get user's order history
+router.get('/history', auth, async (req, res) => {
+  try {
+    const orders = await Order.find({ userId: req.user._id });
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 module.exports = router;

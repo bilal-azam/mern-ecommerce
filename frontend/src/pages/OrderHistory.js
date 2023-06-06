@@ -7,10 +7,14 @@ const OrderHistory = () => {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      const { data } = await axios.get('http://localhost:5000/api/users/orders', {
-        headers: { 'x-auth-token': localStorage.getItem('authToken') }
-      });
-      setOrders(data);
+      try {
+        const { data } = await axios.get('http://localhost:5000/api/orders/history', {
+          headers: { 'x-auth-token': localStorage.getItem('authToken') }
+        });
+        setOrders(data);
+      } catch (err) {
+        console.error('Error fetching order history:', err);
+      }
     };
 
     fetchOrders();
@@ -22,13 +26,8 @@ const OrderHistory = () => {
       <ListGroup>
         {orders.map(order => (
           <ListGroup.Item key={order._id}>
-            <h5>Order ID: {order._id}</h5>
-            <ul>
-              {order.items.map(item => (
-                <li key={item._id}>{item.productId.name} - {item.quantity} x ${item.productId.price}</li>
-              ))}
-            </ul>
-            <h6>Total: ${order.totalPrice}</h6>
+            <h5>Order #{order._id} - ${order.totalPrice}</h5>
+            <p>{order.items.map(item => `${item.productId.name} x ${item.quantity}`).join(', ')}</p>
           </ListGroup.Item>
         ))}
       </ListGroup>
