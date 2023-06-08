@@ -62,4 +62,22 @@ router.post('/profile/image', auth, upload.single('image'), async (req, res) => 
   }
 });
 
+// Add referral
+router.post('/referral', auth, async (req, res) => {
+  const { referralCode } = req.body;
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ msg: 'User not found' });
+
+    if (referralCode) {
+      user.referralCode = referralCode;
+      await user.save();
+    }
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 module.exports = router;
