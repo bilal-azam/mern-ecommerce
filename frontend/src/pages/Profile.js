@@ -7,6 +7,7 @@ const Profile = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [profileImage, setProfileImage] = useState(null);
+  const [referralCode, setReferralCode] = useState('');
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -50,6 +51,16 @@ const Profile = () => {
     }
   };
 
+  const handleReferralSubmit = async () => {
+    try {
+      await axios.post('http://localhost:5000/api/users/referral', { referralCode }, {
+        headers: { 'x-auth-token': localStorage.getItem('authToken') }
+      });
+    } catch (err) {
+      console.error('Error submitting referral code:', err);
+    }
+  };
+
   return (
     <Container>
       <h2>User Profile</h2>
@@ -79,6 +90,17 @@ const Profile = () => {
           />
         </Form.Group>
         <Button type="submit">Update Profile</Button>
+      </Form>
+      <Form>
+        <Form.Group controlId="referralCode">
+          <Form.Label>Referral Code</Form.Label>
+          <Form.Control
+            type="text"
+            value={referralCode}
+            onChange={(e) => setReferralCode(e.target.value)}
+          />
+        </Form.Group>
+        <Button onClick={handleReferralSubmit}>Submit Referral Code</Button>
       </Form>
     </Container>
   );
