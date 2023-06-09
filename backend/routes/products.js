@@ -55,6 +55,26 @@ router.get('/:id/reviews', async (req, res) => {
   }
 });
 
+// Get product review summary
+router.get('/:id/review-summary', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id).populate('reviews');
+    if (!product) return res.status(404).json({ msg: 'Product not found' });
+
+    const reviewSummary = product.reviews.reduce((summary, review) => {
+      summary.totalReviews += 1;
+      summary.totalRating += review.rating;
+      return summary;
+    }, { totalReviews: 0, totalRating: 0 });
+
+    reviewSummary.averageRating = reviewSummary.totalReviews ? (reviewSummary.totalRating / reviewSummary.totalReviews).toFixed(2) : 0;
+
+    res.json(reviewSummary);
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 router.get('/search', async (req, res) => {
   const { query, category, priceRange } = req.query;
   try {
