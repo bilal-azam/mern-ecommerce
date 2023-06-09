@@ -8,6 +8,7 @@ const ProductDetail = ({ match }) => {
   const [reviews, setReviews] = useState([]);
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState('date');
+  const [reviewSummary, setReviewSummary] = useState({});
   const productId = match.params.id;
 
   useEffect(() => {
@@ -23,8 +24,18 @@ const ProductDetail = ({ match }) => {
       setReviews(data);
     };
 
+    const fetchReviewSummary = async () => {
+      try {
+        const { data } = await axios.get(`http://localhost:5000/api/products/${productId}/review-summary`);
+        setReviewSummary(data);
+      } catch (err) {
+        console.error('Error fetching review summary:', err);
+      }
+    };
+
     fetchProduct();
     fetchReviews();
+    fetchReviewSummary();
   }, [productId, page, sort]);
 
   const handleReviewAdded = () => {
@@ -40,8 +51,9 @@ const ProductDetail = ({ match }) => {
           <Card.Title>{product.name}</Card.Title>
           <Card.Text>{product.description}</Card.Text>
           <Card.Text>${product.price}</Card.Text>
+          <Card.Text>Average Rating: {product.averageRating.toFixed(1)} stars</Card.Text>
+          <Card.Subtitle>Average Rating: {reviewSummary.averageRating} ({reviewSummary.totalReviews} reviews)</Card.Subtitle>
         </Card.Body>
-        <Card.Text>Average Rating: {product.averageRating.toFixed(1)} stars</Card.Text>
       </Card>
 
       <ReviewForm productId={productId} onReviewAdded={handleReviewAdded} />
