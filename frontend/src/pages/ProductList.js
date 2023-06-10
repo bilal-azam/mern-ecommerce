@@ -7,6 +7,7 @@ const ProductList = () => {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('');
   const [priceRange, setPriceRange] = useState('');
+  const [sort, setSort] = useState('');
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -18,6 +19,17 @@ const ProductList = () => {
 
     fetchProducts();
   }, [query, category, priceRange]);
+
+  const handleFilterAndSort = async () => {
+    try {
+      const { data } = await axios.get('http://localhost:5000/api/products', {
+        params: { category, sort }
+      });
+      setProducts(data);
+    } catch (err) {
+      console.error('Error fetching products:', err);
+    }
+  };
 
   return (
     <Container>
@@ -47,6 +59,18 @@ const ProductList = () => {
             onChange={(e) => setPriceRange(e.target.value)}
             placeholder="e.g., 10-50"
           />
+        </Form.Group>
+        <Form.Group controlId="sort">
+          <Form.Label>Sort by Price</Form.Label>
+          <Form.Control
+            as="select"
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+          >
+            <option value="">None</option>
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </Form.Control>
         </Form.Group>
       </Form>
       <ListGroup>
