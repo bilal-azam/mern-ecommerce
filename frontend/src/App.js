@@ -10,6 +10,7 @@ import Profile from './pages/Profile';
 import OrderHistory from './pages/OrderHistory';
 import { Container } from 'react-bootstrap';
 import Notifications from './pages/Notifications';
+import LiveChat from './components/LiveChat';
 
 const PrivateRoute = ({ element }) => {
   return isAuthenticated() ? element : <Navigate to="/login" />;
@@ -26,6 +27,7 @@ const App = () => {
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/chat" element={<LiveChat />} />
           <Route path="/profile" element={<PrivateRoute element={<Profile />} />} />
           <Route path="/orders" element={<PrivateRoute element={<OrderHistory />} />} />
           <Route path="/notifications" element={<PrivateRoute element={<Notifications />} />} />
