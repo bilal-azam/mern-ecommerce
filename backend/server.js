@@ -1,7 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config();
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const cartRoutes = require('./routes/cart');
@@ -9,8 +8,13 @@ const orderRoutes = require('./routes/orders');
 const paypalRoutes = require('./routes/paypal');
 const reviewRoutes = require('./routes/reviews');
 const userRoutes = require('./routes/users');
+const http = require('http');
+const socketIO = require('socket.io');
 
+require('dotenv').config();
 const app = express();
+const server = http.createServer(app);
+const io = socketIO(server);
 
 // Middleware
 app.use(cors());
@@ -38,6 +42,18 @@ app.use('/api/users', userRoutes);
 // Basic route
 app.get('/', (req, res) => {
   res.send('eCommerce API');
+});
+
+io.on('connection', (socket) => {
+  console.log('New client connected');
+
+  socket.on('sendMessage', (message) => {
+    io.emit('receiveMessage', message);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Client disconnected');
+  });
 });
 
 
