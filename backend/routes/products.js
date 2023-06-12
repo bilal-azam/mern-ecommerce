@@ -93,4 +93,20 @@ router.get('/search', async (req, res) => {
   }
 });
 
+// Update inventory
+router.put('/:id/inventory', auth, async (req, res) => {
+  const { inventory } = req.body;
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ msg: 'Product not found' });
+
+    product.inventory = inventory;
+    await product.save();
+
+    res.json(product);
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 module.exports = router;
