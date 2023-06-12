@@ -53,6 +53,7 @@ const ProductDetail = ({ match }) => {
           <Card.Text>${product.price}</Card.Text>
           <Card.Text>Average Rating: {product.averageRating.toFixed(1)} stars</Card.Text>
           <Card.Subtitle>Average Rating: {reviewSummary.averageRating} ({reviewSummary.totalReviews} reviews)</Card.Subtitle>
+          <p>Inventory: {product.inventory}</p>
         </Card.Body>
       </Card>
 
