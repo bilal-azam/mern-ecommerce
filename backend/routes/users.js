@@ -80,4 +80,31 @@ router.post('/referral', auth, async (req, res) => {
   }
 });
 
+// Get user notifications
+router.get('/notifications', auth, async (req, res) => {
+  try {
+    const notifications = await Notification.find({ userId: req.user._id }).sort('-createdAt');
+    res.json(notifications);
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// Mark notification as read
+router.post('/notifications/read', auth, async (req, res) => {
+  const { notificationId } = req.body;
+  try {
+    const notification = await Notification.findById(notificationId);
+    if (!notification) return res.status(404).json({ msg: 'Notification not found' });
+
+    notification.read = true;
+    await notification.save();
+
+    res.json(notification);
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+
 module.exports = router;
