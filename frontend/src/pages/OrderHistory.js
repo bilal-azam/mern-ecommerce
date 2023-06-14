@@ -1,33 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, ListGroup } from 'react-bootstrap';
+import { Container, ListGroup, Button } from 'react-bootstrap';
 
-const OrderHistory = () => {
-  const [orders, setOrders] = useState([]);
+const Notifications = () => {
+  const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    const fetchOrders = async () => {
+    const fetchNotifications = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/orders/history', {
+        const { data } = await axios.get('http://localhost:5000/api/users/notifications', {
           headers: { 'x-auth-token': localStorage.getItem('authToken') }
         });
-        setOrders(data);
+        setNotifications(data);
       } catch (err) {
-        console.error('Error fetching order history:', err);
+        console.error('Error fetching notifications:', err);
       }
     };
 
-    fetchOrders();
+    fetchNotifications();
   }, []);
+
+  const markAsRead = async (notificationId) => {
+    try {
+      await axios.post('http://localhost:5000/api/users/notifications/read', { notificationId }, {
+        headers: { 'x-auth-token': localStorage.getItem('authToken') }
+      });
+      setNotifications(notifications.map(notification =>
+        notification._id === notificationId ? { ...notification, read: true } : notification
+      ));
+    } catch (err) {
+      console.error('Error marking notification as read:', err);
+    }
+  };
 
   return (
     <Container>
-      <h2>Order History</h2>
+      <h2>Notifications</h2>
       <ListGroup>
-        {orders.map(order => (
-          <ListGroup.Item key={order._id}>
-            <h5>Order #{order._id} - ${order.totalPrice}</h5>
-            <p>{order.items.map(item => `${item.productId.name} x ${item.quantity}`).join(', ')}</p>
+        {notifications.map(notification => (
+          <ListGroup.Item key={notification._id} className={notification.read ? 'read' : ''}>
+            <p>{notification.message}</p>
+            {!notification.read && <Button onClick={() => markAsRead(notification._id)}>Mark as Read</Button>}
           </ListGroup.Item>
         ))}
       </ListGroup>
@@ -35,4 +48,4 @@ const OrderHistory = () => {
   );
 };
 
-export default OrderHistory;
+export default Notifications;
